@@ -6,7 +6,7 @@ class Vine(Latchable):
 
 	MAX_LENGTH = 600
 
-	def __init__ (s, tangle, origin_x, origin_y, origin_theta = None, speed = 10):
+	def __init__ (s, origin_x=0, origin_y=0, origin_theta = None, speed = 10):
 		super(Vine, s).__init__()
 
 		s.x = origin_x
@@ -18,7 +18,6 @@ class Vine(Latchable):
 
 		s.points = [(s.x, s.y)]
 
-		s.functions = tangle.functions
 		s.fn = Fn()
 
 
@@ -28,20 +27,21 @@ class Vine(Latchable):
 	def Y(s):
 		return s.y
 
+
 	def update(s):
-		s.theta += s.fn.frame()
+		s.theta += s.get('theta_wander')
 
-		s.theta += (PI/2 - s.theta) * 0.1
+		s.theta += (PI/2 - s.theta)* 0.05 #* ( Fn.sin(10, 0.05, 0.1) )
 
-		if s.get('signal') > random(.09, .2):
-			s.theta += random(-1,1)
-
-		s.x += sin(s.theta) * s.speed
-		s.y += cos(s.theta) * s.speed
+		s.x += sin(s.theta) * s.get('speed')
+		s.y += cos(s.theta) * s.get('speed')
 		s.points.append ((s.x, s.y))
 
 		if len(s.points) > Vine.MAX_LENGTH:
 			del s.points[0]
+
+		if frameCount > 120:
+			s.mode('sharp_wander')
 
 	def draw(s):
 		points_list = zip(s.points[0:-1], s.points[1:])
@@ -54,36 +54,71 @@ class Vine(Latchable):
 			line (points[0][0], points[0][1], points[1][0], points[1][1])
 
 	def connect(s, stack):
-		s.latch('signal', stack[1].mix )
+		modes = {
+			'normal': {
+				'signal': stack['audio'].mix,
+				'speed': lambda: s.speed * (1 + s.get('signal', 1.0)) ,
+				'wander': lambda: 0.1 + 0.05 * Fn.sin(1000.),
+				'theta_wander': lambda: s.fn.noise() * 0.5 
+			}, 
+			'sharp': {
+				'theta_wander': lambda: s.fn.noise() * 5.0
+			},
+			'sharp_wander': {
+				'theta_wander': lambda: s.fn.noise() * s.get('wander')*10
+			}
+		}
 
 
-class Tangle(Latchable):
+
+		s.addModes(modes)
+
+
+class Bead(Latchable):
+
+	MAX_SIZE = 10
+	GROWTH = .04
+
+	def __init__(s, x, y):
+		super(Bead, s).__init__()
+		s.x = x + random(-100, 100)
+		s.y = y + random(-100,100)
+
+		s.size = 0
+		s.active = True
+
+	def update(s):
+		s.size += (Bead.MAX_SIZE - s.size)* Bead.GROWTH
+
+		if s.size > Bead.MAX_SIZE * .999:
+			s.active = False
+
+	def draw(s):
+		noStroke()
+		fill(0)
+		ellipse(s.x, s.y, s.size, s.size)
+
+
+class VineArray(Latchable):
 
 	def __init__(s, length):
-		super(Tangle, s).__init__()
-		s.vines = [Vine(s, random(width)-width/2, random(height)-height/2) for i in xrange(length)]
-
-
-
+		super(VineArray, s).__init__()
+		s.vines = [Vine() for i in xrange(length)]
 
 	def update(s):
 		[vine.update() for vine in s.vines]
 
-		if random(1) < s.get('signal',2):
-			s.vines.append(Vine(s, s.vines[0].X(), s.vines[0].Y()))
+		# if random(1) < s.get('signal',1):
+			# s.vines.append(Vine(s, s.vines[0].X(), s.vines[0].Y()))
 			
-
-		# sg = sig
-		# while( sg > 0.10):
-			# sg -= .10
-		# if random(1) < 0.01:
-			# s.vines.append(Vine(s.vines[0].X(), s.vines[0].Y()))
 
 		if len(s.vines) > 30:
 			del s.vines[1]
 
+
 	def connect(s, stack):
-		s.latch('signal', stack[1].mix )
+		s.latch('signal', stack['audio'].mix)
+		[v.connect(stack) for v in s.vines]
 
 
 	def draw(s):

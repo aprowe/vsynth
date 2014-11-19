@@ -10,24 +10,23 @@ class CameraController(Latchable):
 		s.rotate = 0
 
 	def connect(s, stack):
-		s.latch('x_follow', stack[2].vines[0].X )
-		s.latch('y_follow', stack[2].vines[0].Y )
+		s.latch('x_follow', stack['vines'].vines[0].X )
+		s.latch('y_follow', stack['vines'].vines[0].Y )
 
-		s.latch('signal', lambda: 1 - stack[1].mix() )
+		s.latch('signal', lambda: 1 - stack['audio'].mix() )
 
 	def update(s):
 		s.x += Fn.approach( s.get('x_follow'), s.x, 0.03) 
 		s.y += Fn.approach( s.get('y_follow'), s.y, 0.03)
-		s.scale += Fn.approach ( s.get('signal'), s.scale, 0.3)
-
-		s.rotate = Fn.sin( 100.0 )
+		# s.scale += Fn.approach ( s.get('signal'), s.scale, 0.1)
+		s.rotate = PI/2 * Fn.sin( 15.0 )
 		# if s.positional:
 			# s.x += (s.get('x_follow') - s.x) * 0.03
 			# s.y += (s.get('y_follow') - s.y) * 0.03
 
-		# s.x += Noise.Frame(0)
-		# s.y += Noise.Frame(1)
-		# s.scale += Noise.Frame(2)/50
+		# s.x += Noise.Noise(0)
+		# s.y += Noise.Noise(1)
+		# s.scale += Noise.Noise(2)/50
 
 	def draw(s):
 		translate (width/2, height/2)

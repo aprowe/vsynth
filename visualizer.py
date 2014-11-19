@@ -9,30 +9,39 @@ from Tangle import *
 
 def setup():
 	global stack
-	stack = []
+	stack = Stack()
 
 	size(1440, 900)
 
-	stack.append (CameraController()) 
-	stack.append (AudioController())
-	stack.append (Tangle(1))
-	# stack['audio'] = AudioController()
-	# stack['audio'] = AudioController()
-	# stack['vines'] = Tangle(1)
+	stack.add('camera', CameraController())
+	stack.add('audio', AudioController())
+	stack.add('vines', VineArray(1))
 
-	[s.connect(stack) for s in stack]
-	# stack[1].latch(stack[0])
-	# stack['camera'].latch('x_follow', stack[1].vines[0].X )
-	# stack[0].latch('y_follow', stack[1].vines[0].Y )
+	stack.call('connect', stack)
+
 
 def draw():
 	update()
 	background (247, 227, 200)
-	[s.draw() for s in stack]
+	stack.call('draw')
 
 
 def update():
-	[s.update() for s in stack]
+	stack.call('update')
 
+
+
+class Stack(dict):
+
+	def __init__(s):
+		super(Stack, s).__init__()
+		s.order = list()
+
+	def add(s, label, runnable):
+		s[label] = runnable
+		s.order.append(label)
+
+	def call(s, fn, *args):
+		[getattr(s[item], fn)(*args) for item in s.order]
 
 
