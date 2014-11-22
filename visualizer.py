@@ -13,6 +13,8 @@ def setup():
 
 	size(1440, 900)
 
+	Latchable.stack = stack
+	
 	stack.add('camera', CameraController())
 	stack.add('audio', AudioController())
 	stack.add('vines', VineArray(1))

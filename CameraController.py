@@ -8,30 +8,42 @@ class CameraController(Latchable):
 		s.x = s.y = 0
 		s.scale = 1
 		s.rotate = 0
+		s.following = None
 
 	def connect(s, stack):
-		s.latch('x_follow', stack['vines'].vines[0].X )
-		s.latch('y_follow', stack['vines'].vines[0].Y )
 
-		s.latch('signal', lambda: 1 - stack['audio'].mix() )
+		modes = {
+			'normal': {
+				'signal': lambda: stack['audio'].mix(),
+				'following': lambda: stack['vines'].vines[0],
+				'x_follow': lambda: s.get('following').x,
+				'y_follow': lambda: s.get('following').y,
+				'step_x': lambda: 
+					Fn.approach( s.get('x_follow'), s.x, 0.03),
+				'step_y': lambda: 
+					Fn.approach( s.get('y_follow'), s.y, 0.03),
+				'rotate': lambda: PI/2 * Fn.sin( 15.0 )
+			},
+			'shift_targets': {
+				'following': lambda: s.following
+			}
+		}
+
+		s.addModes(modes)
 
 	def update(s):
-		s.x += Fn.approach( s.get('x_follow'), s.x, 0.03) 
-		s.y += Fn.approach( s.get('y_follow'), s.y, 0.03)
-		# s.scale += Fn.approach ( s.get('signal'), s.scale, 0.1)
-		s.rotate = PI/2 * Fn.sin( 15.0 )
-		# if s.positional:
-			# s.x += (s.get('x_follow') - s.x) * 0.03
-			# s.y += (s.get('y_follow') - s.y) * 0.03
+		s.x += s.get('step_x')
+		s.y += s.get('step_y')
+		s.rotate = s.get('rotate')
 
-		# s.x += Noise.Noise(0)
-		# s.y += Noise.Noise(1)
-		# s.scale += Noise.Noise(2)/50
+		if Fn.every(2):
+			s.following = s.stack['vines'].randomVine()
+			s.mode('shift_targets')
+
 
 	def draw(s):
 		translate (width/2, height/2)
-		# scale (s.scale)
-		scale( s.scale + .2)
+		scale(s.scale)
 		rotate (s.rotate)
 		translate (-s.x, -s.y)
 

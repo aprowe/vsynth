@@ -1,11 +1,3 @@
-
-class Positional(object):
-	def X():
-		pass
-
-	def Y():
-		pass
-
 class Latchable(object):
 
 	def __init__(self):
@@ -21,8 +13,13 @@ class Latchable(object):
 	def latch(self, name, function):
 		self.modes[self.current_mode][name] = function
 
-	def get(self, name, factor = 1):
-		return self.modes[self.current_mode][name]() * factor
+	def get(self, name, mode=None ,*args):
+		if not mode:
+			mode = self.current_mode
+		return self.modes[mode][name](*args)
+
+	def addStack(self, stack):
+		Latchable.stack = stack
 
 	def connect(self, stack):
 		pass
