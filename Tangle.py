@@ -4,39 +4,45 @@ from CameraController import *
 
 class Vine(Latchable):
 
-	MAX_LENGTH = 600
+	MAX_LENGTH = 100
 	SPEED = 10
 
-	def __init__ (s, origin_x=0, origin_y=0, theta=None, speed=10):
+	def __init__ (s, origin_x=0, origin_y=0, theta=None, speed=15):
 		super(Vine, s).__init__()
 
 		s.x = origin_x
 		s.y = origin_y
 		s.theta = random(0, 2*PI) if theta is None else theta
 		s.speed = speed
-
 		s.weight_factor = 1.01
-
 		s.points = [(s.x, s.y)]
 
-		# Random Seeder
-		s.fn = Fn()
+		noise = {
+			'source': 'noise',
+			'noise': {
+				'amplitude': 1
+			},
+			'operator': 'add',
+			'target':'theta'
+		}
 
-		s.connect(Vine.stack)
+		# noise2 = {
+		# 	'source': 'noise',
+		# 	'noise': {
+		# 		'amplitude': 100
+		# 	},
+		# 	'operator': 'add',
+		# 	'target':'theta'
+		# }
 
-
-	def X(s):
-		return s.x
-
-	def Y(s):
-		return s.y
+		s.latch(noise)
+		# s.latch(noise2)
 
 
 	def update(s):
-
-		s.theta += s.get('theta')
-		s.x += sin(s.theta) * s.get('speed')
-		s.y += cos(s.theta) * s.get('speed')
+		super(Vine, s).update()
+		s.x += sin(s.theta) * s.speed
+		s.y += cos(s.theta) * s.speed
 		s.points.append ((s.x, s.y))
 
 		if len(s.points) > Vine.MAX_LENGTH:
@@ -52,45 +58,6 @@ class Vine(Latchable):
 			strokeWeight (stroke_weight)
 			line (points[0][0], points[0][1], points[1][0], points[1][1])
 
-	def connect(s, stack):
-		modes = {
-			'normal': {
-				'signal': lambda: stack['audio'].mix(),
-				'speed': lambda: s.speed * (1 + s.get('signal')) ,
-				'wander': lambda: 0.1 + 0.05 * Fn.sin(1000.),
-				'follow_angle': lambda: (PI/2 - s.theta)*0.1,
-				'theta': lambda: s.get('follow_angle') + s.fn.noise()
-			}
-		}
-
-
-
-		s.addModes(modes)
-
-
-class Bead(Latchable):
-
-	MAX_SIZE = 10
-	GROWTH = .04
-
-	def __init__(s, x, y):
-		super(Bead, s).__init__()
-		s.x = x + random(-100, 100)
-		s.y = y + random(-100,100)
-
-		s.size = 0
-		s.active = True
-
-	def update(s):
-		s.size += (Bead.MAX_SIZE - s.size)* Bead.GROWTH
-
-		if s.size > Bead.MAX_SIZE * .999:
-			s.active = False
-
-	def draw(s):
-		noStroke()
-		fill(0)
-		ellipse(s.x, s.y, s.size, s.size)
 
 
 class VineArray(Latchable):
@@ -98,47 +65,47 @@ class VineArray(Latchable):
 	def __init__(s, length=1):
 		super(VineArray, s).__init__()
 		s.vines = [Vine() for i in xrange(length)]
+		s.lastx = 0
+		s.lasty = 0
+		s.spawn = 0
 
-	def update(s):
-		[vine.update() for vine in s.vines]
-
-		if s.get('spawn_rate'):
-			s.spawn(s.get('spawn_amount'))
-
-		if len(s.vines) > 30:
-			del s.vines[1]
-
-	def spawn(s, amount=0):
-		[s.vines.append( Vine(*s.get('spawnling', None, i)) ) for i in range(amount)]
-
-	def randomVine(s):
-		return s.vines[ int(random(0, len(s.vines))) ] 
-
-
-	def connect(s, stack):
-		s.latch('signal', stack['audio'].mix)
-		s.latch('spawn_rate', lambda: random(1) < s.get('signal'))
-		s.latch('spawnling', lambda i: (s.vines[0].x, s.vines[0].y) )
-		s.latch('spawn_amount', lambda: 1 )
-
-
-		def spawnTwo(i):
-			x = s.vines[0].x
-			y = s.vines[0].y
-			theta = s.vines[0].theta-PI/4 if i == 0 else s.vines[0].theta+PI/4
-			return (x,y,theta)
-
-		modes = {
-			'fixed_rate': {
-				'spawn_rate': lambda: Fn.every(2),
-				'spawn_amount': lambda: 2,
-				'spawnling': spawnTwo
-			}
+		lastx = {
+			'source': lambda: s.vines[0].x,
+			'operator': 'equals',
+			'target': 'lastx'
 		}
 
-		s.addModes(modes)
+		lasty = {
+			'source': lambda: s.vines[0].y,
+			'operator': 'equals',
+			'target': 'lasty'
+		}
 
-		s.mode('fixed_rate')
+		spawn = {
+			'source': 'every',
+			'operator': 'equals',
+			'target': 'spawn'
+		}
+
+		s.latch(lastx)
+		s.latch(lasty)
+		s.latch(spawn)
+
+
+
+	def update(s):
+		super(VineArray, s).update()
+		[vine.update() for vine in s.vines]
+		print s.lasty
+
+		if s.spawn:
+			s.vines.append(Vine(s.lastx, s.lasty))
+
+
+		if len(s.vines) > 20:
+			del s.vines[1]
+
+
 
 	def draw(s):
 		[vine.draw() for vine in s.vines]
