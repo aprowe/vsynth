@@ -1,9 +1,9 @@
 class CDict(dict):
 
 	def init(self):
-		super().__init__()
+		super(CDict, self).__init__()
 
-	def __call__(self):
+	def eval(self):
 		c = CDict()
 		for key, value in self.items():
 			if type(value) is dict:
@@ -15,22 +15,22 @@ class CDict(dict):
 			c[key] = value
 		return c
 
-	def reduce(self):
+
+	def reduce(self,target):
 		c = {}
 		for key, value in self.items():
-			c[key] = self.reduceItem(value)
+			c[key] = self.reduceItem(value, target)
 		return CDict(c)
 
-	def reduceItem(self, value):
+	def reduceItem(self, value, target):
 		if type(value) is list: 
 			fn = value[0]
-			attr = lambda: getattr(self, value[0])
+			attr = lambda: getattr(target, value[0])
 
 			if callable(attr()):
 				params = {} if len(value) is 1 else value[1]
-				params = CDict(params).reduce3()
-				# params = self.reduceItem(value[1])
-				return lambda: attr()(**params())
+				params = CDict(params).reduce(target)
+				return lambda: attr()(**params.eval())
 			else: 
 				return attr
 
@@ -39,3 +39,19 @@ class CDict(dict):
 			return value
 
 		return lambda: value
+
+
+def formatLatch(dic):
+	source = dic['source']
+	target = dic['target']
+	op_params = {}
+	op_fn = dic['operator'][0]
+
+	if len(dic['operator']) > 1:
+		op_params = dic['operator'][1]
+
+	params = list(op_params.items()) + list({'source': source, 'target': target}.items())
+	params = dict(params)
+	output = {'operator': [op_fn, params]}
+	return output
+

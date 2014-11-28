@@ -17,14 +17,34 @@ class Vine(Latchable):
 		s.weight_factor = 1.01
 		s.points = [(s.x, s.y)]
 
-		noise = {
-			'source': 'noise',
-			'noise': {
-				'amplitude': 1
+		latches = [
+			{   ## Noise Movement
+				'source': ['noise', {
+					'amplitude': 1.0
+				}],
+				'operator': ['add'],
+				'target': 'theta'
 			},
-			'operator': 'add',
-			'target':'theta'
-		}
+			{   ## Angle Bias
+				'source': ['lfo', {
+					'amplitude': PI/4,
+					'period': 10
+				}], 
+				'operator': ['approach', {
+					'speed': 0.10
+				}],
+				'target': 'theta'
+			}
+		]
+
+		# noise2 = {
+		# 	'source': 0,
+		# 	'operator': ['approach', {
+		# 		'speed': 200.0
+		# 	}],
+		# 	'target':'theta'
+		# }
+
 
 		# noise2 = {
 		# 	'source': 'noise',
@@ -35,7 +55,7 @@ class Vine(Latchable):
 		# 	'target':'theta'
 		# }
 
-		s.latch(noise)
+		[s.latch(l) for l in latches]
 		# s.latch(noise2)
 
 
@@ -53,8 +73,11 @@ class Vine(Latchable):
 		points_list = zip(s.points[0:-1], s.points[1:])
 
 		stroke_weight = 0.1
-		for points in reversed (points_list):
-			stroke_weight += (15 - stroke_weight) * 0.01
+		for points, index in zip(reversed (points_list), range(len(points_list))):
+			mod = 1
+			if index > Vine.MAX_LENGTH/2:
+				mod = -1
+			stroke_weight += (15 - stroke_weight) * 0.01 * mod
 			strokeWeight (stroke_weight)
 			line (points[0][0], points[0][1], points[1][0], points[1][1])
 
@@ -69,40 +92,43 @@ class VineArray(Latchable):
 		s.lasty = 0
 		s.spawn = 0
 
-		lastx = {
-			'source': lambda: s.vines[0].x,
-			'operator': 'equals',
-			'target': 'lastx'
-		}
+		# lastx = {
+		# 	'source': lambda: s.vines[0].x,
+		# 	'operator': 'equals',
+		# 	'target': 'lastx'
+		# }
 
-		lasty = {
-			'source': lambda: s.vines[0].y,
-			'operator': 'equals',
-			'target': 'lasty'
-		}
+		# lasty = {
+		# 	'source': lambda: s.vines[0].y,
+		# 	'operator': 'equals',
+		# 	'target': 'lasty'
+		# }
 
 		spawn = {
-			'source': 'every',
-			'operator': 'equals',
+			'source': ['signal', {
+				'amplitude': 10.0
+			}],
+			'operator': ['equals'],
 			'target': 'spawn'
 		}
 
-		s.latch(lastx)
-		s.latch(lasty)
+		# s.latch(lastx)
+		# s.latch(lasty)
 		s.latch(spawn)
 
 
 
 	def update(s):
 		super(VineArray, s).update()
-		[vine.update() for vine in s.vines]
-		print s.lasty
+		[vine.update() for vine in s.vines]	
 
-		if s.spawn:
-			s.vines.append(Vine(s.lastx, s.lasty))
+		for i in range(int(s.spawn)):
+			s.vines.append (Vine(s.lastx, s.lasty))
 
+		s.lastx = s.vines[0].x
+		s.lasty = s.vines[0].y
 
-		if len(s.vines) > 20:
+		while len(s.vines) > 25:
 			del s.vines[1]
 
 

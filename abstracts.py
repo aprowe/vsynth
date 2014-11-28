@@ -1,4 +1,4 @@
-import CDict
+from CDict import *
 
 def callable(arg):
 	return hasattr(arg, '__call__')
@@ -28,47 +28,31 @@ class Latchable(object):
 	def addStack(self, stack):
 		Latchable.Stack = stack
 
-
-	def call(self, args, key):
-		value = args[key]
-		
-		if string(value):
-			attr = getattr(self, value)
-			if callable(attr):
-				params = {}
-				if value in args:				
-					params = args[value]
-
-				return lambda: attr(**params)
-
-			else:
-				return lambda: attr
-
-
-		elif callable(value):
-			return value
-
-		return lambda: value
-
-
 	def latch(self, args):
 		target = args['target']
+		args['target'] = [target]
+		args = Latchable.formatLatch(args)
 
-		targetFn = lambda: getattr(self, target)
-		sourceFn = self.call(args, 'source')
+		operator = args.reduce(self)['operator']
+		update = lambda: setattr(self, target, operator())
 
-		operator = args['operator']
-		operatorFn = getattr(self, operator)
+		self.functions.append(update)
 
-		opArgs = {}
-		if operator in args:
-			opArgs = args[operator]
+	@staticmethod
+	def formatLatch(dic):
+		source = dic['source']
+		target = dic['target']
+		op_params = {}
+		op_fn = dic['operator'][0]
 
-		value = lambda: operatorFn(targetFn(), sourceFn(), **opArgs)
+		if len(dic['operator']) > 1:
+			op_params = dic['operator'][1]
 
-		fn = lambda: setattr(self, target, value())
+		params = list(op_params.items()) + list({'source': source, 'target': target}.items())
+		params = dict(params)
+		output = {'operator': [op_fn, params]}
+		return CDict(output)
 
-		self.functions.append(fn)
 
 	##################################
 	#	Operator Methods
@@ -83,7 +67,7 @@ class Latchable(object):
 	def multiply(self, target, source):
 		return target * source;
 
-	def approach(self, target, source, speed=0.01):
+	def approach(self, target, source, speed=0.03):
 		return target + (source-target)*speed
 
 	def vadd(self, target, source):
@@ -97,14 +81,13 @@ class Latchable(object):
 	##################################
 	#	Source Methods
 	##################################
-	def lfo(self, amplitude=1, rate=1, phase=0, offset=0):
-		return amplitude * sin(float(frameCount)/60.0 / rate * 2 * PI + phase) + offset
+	def lfo(self, amplitude=1, period=1, phase=0, offset=0):
+		return amplitude * sin(float(frameCount)/60.0 / period * 2 * PI + phase) + offset
 
 	def envelope(self, attack, decay, sustain, release):
 		pass
 
 	def stack(self, key, attr):
-		print key, attr
 		return getattr(Latchable.Stack[key], attr);
 
 	def noise (self, amplitude=1, speed=100.0, seed1=None, seed2=None):
@@ -122,6 +105,9 @@ class Latchable(object):
 			return 1
 		else:
 			return 0
+
+	def signal(self, amplitude = 1.0):
+		return Latchable.Stack['audio'].mix() * amplitude
 
 
 

@@ -12,25 +12,20 @@ class CameraController(Latchable):
 		s.following = None
 
 		followx = {
-			'source': 'stack',
-			'stack': {
+			'source': ['stack', {
 				'key': 'vines',
-				'attr': 'lastx',
-			},
-			'operator': 'approach',
-			'approach': {
-				'speed': 0.015
-			},
+				'attr': 'lastx'
+			}],
+			'operator': ['approach'],
 			'target': 'x'
 		}
 
 		followy = {
-			'source': 'stack',
-			'stack': {
+			'source': ['stack', {
 				'key': 'vines',
-				'attr': 'lasty',
-			},
-			'operator': 'approach',
+				'attr': 'lasty'
+			}],
+			'operator': ['approach'],
 			'target': 'y'
 		}
 
@@ -53,6 +48,10 @@ class AudioController(Latchable):
 		s.minim = Minim(this)
 		s.mic = s.minim.getLineIn(1)
 		s.sig = 0
+
+	def update(s):
+		s.sig = s.average()
+		super(AudioController, s).update()
 	
 	def average(s):
 		sum=0
