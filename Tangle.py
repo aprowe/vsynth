@@ -4,60 +4,16 @@ from CameraController import *
 
 class Vine(Latchable):
 
-	MAX_LENGTH = 100
-	SPEED = 10
+	MAX_LENGTH = 200
 
 	def __init__ (s, origin_x=0, origin_y=0, theta=None, speed=15):
-		super(Vine, s).__init__()
-
 		s.x = origin_x
 		s.y = origin_y
 		s.theta = random(0, 2*PI) if theta is None else theta
 		s.speed = speed
 		s.weight_factor = 1.01
 		s.points = [(s.x, s.y)]
-
-		latches = [
-			{   ## Noise Movement
-				'source': ['noise', {
-					'amplitude': 1.0
-				}],
-				'operator': ['add'],
-				'target': 'theta'
-			},
-			{   ## Angle Bias
-				'source': ['lfo', {
-					'amplitude': PI/4,
-					'period': 10
-				}], 
-				'operator': ['approach', {
-					'speed': 0.10
-				}],
-				'target': 'theta'
-			}
-		]
-
-		# noise2 = {
-		# 	'source': 0,
-		# 	'operator': ['approach', {
-		# 		'speed': 200.0
-		# 	}],
-		# 	'target':'theta'
-		# }
-
-
-		# noise2 = {
-		# 	'source': 'noise',
-		# 	'noise': {
-		# 		'amplitude': 100
-		# 	},
-		# 	'operator': 'add',
-		# 	'target':'theta'
-		# }
-
-		[s.latch(l) for l in latches]
-		# s.latch(noise2)
-
+		super(Vine, s).__init__()
 
 	def update(s):
 		super(Vine, s).update()
@@ -86,37 +42,11 @@ class Vine(Latchable):
 class VineArray(Latchable):
 
 	def __init__(s, length=1):
-		super(VineArray, s).__init__()
 		s.vines = [Vine() for i in xrange(length)]
 		s.lastx = 0
 		s.lasty = 0
 		s.spawn = 0
-
-		# lastx = {
-		# 	'source': lambda: s.vines[0].x,
-		# 	'operator': 'equals',
-		# 	'target': 'lastx'
-		# }
-
-		# lasty = {
-		# 	'source': lambda: s.vines[0].y,
-		# 	'operator': 'equals',
-		# 	'target': 'lasty'
-		# }
-
-		spawn = {
-			'source': ['signal', {
-				'amplitude': 10.0
-			}],
-			'operator': ['equals'],
-			'target': 'spawn'
-		}
-
-		# s.latch(lastx)
-		# s.latch(lasty)
-		s.latch(spawn)
-
-
+		super(VineArray, s).__init__()
 
 	def update(s):
 		super(VineArray, s).update()
@@ -130,8 +60,6 @@ class VineArray(Latchable):
 
 		while len(s.vines) > 25:
 			del s.vines[1]
-
-
 
 	def draw(s):
 		[vine.draw() for vine in s.vines]

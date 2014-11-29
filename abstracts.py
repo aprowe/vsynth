@@ -1,4 +1,6 @@
 from CDict import *
+import json
+
 
 def callable(arg):
 	return hasattr(arg, '__call__')
@@ -12,23 +14,58 @@ def string(arg):
 class Latchable(object):
 
 	def __init__(self):
-		self.functions = []
 		self.seed1 = random(-1000, 1000)
 		self.seed2 = random(-1000, 1000)
+		self.current_mode_name = 'default'
+		self.modes = {'default': []}
+		self.attach_latches()
 
 	def draw(self):
 		pass
 
 	def update(self):
-		[fn() for fn in self.functions]
+		[fn() for fn in self.current_mode()]
+
+	##################################
+	#	Mode Methods
+	##################################
+	def setMode(self, name):
+		self.current_mode_name = name
+
+	def current_mode(self):
+		return self.modes[self.current_mode_name]
+
+	def load_mode(self, filename):
+		try:
+			json_data=open('modes/'+filename + '.json')
+		except:
+			return {}
+
+		data = json.load(json_data)
+		json_data.close()
+		print(data)
+		return data
 
 	##################################
 	#	'Stack' Methods
 	##################################
+	def attach_latches(self):
+		latches = self.getLatches()
+		if type(latches) is list:
+			[self.latch(l) for l in latches]
+		elif type(latches) is dict:
+			for mode, value in latches.items():
+				self.modes[mode] = []
+				[self.latch(l, mode) for l in value]
+
+	def getLatches(self):
+		return self.load_mode(self.__class__.__name__)
+		# return {}
+
 	def addStack(self, stack):
 		Latchable.Stack = stack
 
-	def latch(self, args):
+	def latch(self, args, mode='default'):
 		target = args['target']
 		args['target'] = [target]
 		args = Latchable.formatLatch(args)
@@ -36,7 +73,7 @@ class Latchable(object):
 		operator = args.reduce(self)['operator']
 		update = lambda: setattr(self, target, operator())
 
-		self.functions.append(update)
+		self.modes[mode].append(update)
 
 	@staticmethod
 	def formatLatch(dic):

@@ -5,33 +5,12 @@ from ddf.minim import Minim
 class CameraController(Latchable):
 
 	def __init__(s):
-		super(CameraController, s).__init__()
 		s.x = s.y = 0
 		s.scale = 1
 		s.rotate = 0
 		s.following = None
+		super(CameraController, s).__init__()
 
-		followx = {
-			'source': ['stack', {
-				'key': 'vines',
-				'attr': 'lastx'
-			}],
-			'operator': ['approach'],
-			'target': 'x'
-		}
-
-		followy = {
-			'source': ['stack', {
-				'key': 'vines',
-				'attr': 'lasty'
-			}],
-			'operator': ['approach'],
-			'target': 'y'
-		}
-
-
-		s.latch(followx)
-		s.latch(followy)
 
 
 	def draw(s):
@@ -44,10 +23,10 @@ class CameraController(Latchable):
 class AudioController(Latchable):
 	
 	def __init__(s):
-		super(AudioController, s).__init__()
 		s.minim = Minim(this)
 		s.mic = s.minim.getLineIn(1)
 		s.sig = 0
+		super(AudioController, s).__init__()
 
 	def update(s):
 		s.sig = s.average()
