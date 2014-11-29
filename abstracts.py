@@ -20,6 +20,7 @@ class Latchable(object):
 		self.modes = {'default': []}
 		self.attach_latches()
 
+
 	def draw(self):
 		pass
 
@@ -77,6 +78,9 @@ class Latchable(object):
 
 	@staticmethod
 	def formatLatch(dic):
+		if 'source' not in dic:
+			dic['source'] = dic['target']
+
 		source = dic['source']
 		target = dic['target']
 		op_params = {}
@@ -114,6 +118,20 @@ class Latchable(object):
 		return tuple(c)
 
 
+	##################################
+	#	Behaviors
+	##################################
+	def tanh(self, target, source, min=0, max=1, dmin=0, dmax=1, sharpness=1.0):
+		amp = (max-min)/2.0
+		off = (max+min)/2.0
+		damp = (dmax-dmin)/2.0
+		doff = (dmax+dmin)/2.0
+		x = sharpness/damp*(source-doff)
+		y = x/sqrt(1+x**2) 
+
+		return amp * y + off
+
+
 
 	##################################
 	#	Source Methods
@@ -145,7 +163,6 @@ class Latchable(object):
 
 	def signal(self, amplitude = 1.0):
 		return Latchable.Stack['audio'].mix() * amplitude
-
 
 
 

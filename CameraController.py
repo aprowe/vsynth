@@ -11,8 +11,6 @@ class CameraController(Latchable):
 		s.following = None
 		super(CameraController, s).__init__()
 
-
-
 	def draw(s):
 		translate (width/2, height/2)
 		scale(s.scale)

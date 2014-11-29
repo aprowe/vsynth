@@ -17,18 +17,20 @@
 		"target": "theta"
 	},
 	{
-		"source": 3,
-		"operator": ["approach", {
-			"speed": 0.4
-		}],
-		"target": "speed"
-	},
-	{
 		"source": ["signal", {
 			"amplitude": 100
 		}], 
 		"operator": ["approach", {
 			"speed": 0.4
+		}],
+		"target": "speed"
+	},
+	{	
+		"operator": ["tanh", {
+			"min": 2.5,
+			"max": 10.0,
+			"dmin": 2,
+			"dmax": 10
 		}],
 		"target": "speed"
 	}

@@ -17,6 +17,7 @@ class Vine(Latchable):
 
 	def update(s):
 		super(Vine, s).update()
+		print(s.speed)
 		s.x += sin(s.theta) * s.speed
 		s.y += cos(s.theta) * s.speed
 		s.points.append ((s.x, s.y))
