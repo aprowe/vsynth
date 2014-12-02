@@ -74,6 +74,7 @@ class Latchable(object):
 
 		args = data[class_name]
 		self.attach_latches(args, mode)
+		print "Loaded "+mode 
 
 	def load_all_modes(self):
 		files = (os.path.splitext(file)[0]
@@ -198,7 +199,7 @@ class Latchable(object):
 		if seed2 is None:
 			seed2 = self.seed2
 
-		return amplitude * noise(float( frameCount / speed), seed1, seed2) - 0.5
+		return amplitude * (noise(float( frameCount / speed), seed1, seed2) - 0.5)
 
 
 	def every(self, seconds=1):
@@ -236,8 +237,18 @@ class Positional(Latchable):
 		target.y = y
 		return target
 
+	def wander(s, target, source, amplitude=1, speed=1):
+		x = s.noise(amplitude, speed, 1)
+		y = s.noise(amplitude, speed, 2)
+		target.x += x
+		target.y += y
+		return target
+
 
 	def point(s, x, y):
 		return Positional(x, y)
+
+	def distance(s, point):
+		return sqrt((point.y - s.y)**2+(point.x - s.x)**2)
 
 

@@ -9,6 +9,7 @@ class CameraController(Positional):
 		s.scale = 1
 		s.rotate = 0
 		s.following = None
+		s.speed = 0
 		super(CameraController, s).__init__()
 
 	def draw(s):
@@ -16,7 +17,6 @@ class CameraController(Positional):
 		scale(s.scale)
 		rotate (s.rotate)
 		translate (-s.x, -s.y)
-
 
 
 class AudioController(Latchable):

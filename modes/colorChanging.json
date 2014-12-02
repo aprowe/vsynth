@@ -1,0 +1,79 @@
+{
+	"CameraController": [
+		{	
+			"source": ["signal", {
+				"amplitude": 10.0
+			}],
+			"operator": ["approach", {
+				"speed": 0.5
+			}],		
+			"target": "speed"
+		},
+		{	
+			"source": 0,
+			"operator": ["approach"],		
+			"target": "speed"
+		},
+		{
+			"operator": ["wander", {
+				"speed": 100.0,
+				"amplitude": ["speed"]
+			}],
+			"target": "self"
+		},
+		{	
+			"source": 0.01,
+			"operator": ["add"],
+			"target": "x"
+		},
+		{	
+			"source": 0.01,
+			"operator": ["add"],
+			"target": "y"
+		},
+		{	
+			"source": ["noise", {
+				"amplitude": 0.10,
+				"speed": 500.0
+			}],
+			"operator": ["add"],
+			"target": "rotate"
+		}
+	],
+	"CircleArray": [
+		{
+			"source": ["stack", {
+				"key": "camera"
+			}],
+			"operator": ["follow", {
+				"speed": 0.05
+				}],
+			"target": "self"
+		},
+		{
+			"operator": ["wander", {
+				"speed": 0.02,
+				"amplitude": 10.0
+			}]
+		}
+	],
+	"Circle": [
+		{
+			"source": ["signal", {
+				"amplitude": 100
+			}],
+			"operator": ["approach", {
+				"speed": ["delay"]
+			}],
+			"target": "extra_radius"
+		},
+		{
+			"source": ["lfo", {
+				"amplitude": 100,
+				"period": 1
+			}],
+			"operator": ["equals"],
+			"target": "randomness"
+		}
+	]
+}

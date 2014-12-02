@@ -5,12 +5,12 @@ from Controllers import *
 class VSynth(Stack):
 
 	def __init__(self):
-		Latchable.stack = self
+		Latchable.Stack = self
 		super(VSynth, self).__init__()
+		self.current_mode = 'default'
 		self.add('camera', CameraController())
 		self.add('audio', AudioController())
 		self.add('midi', MidiController())
-		self.current_mode = 'default'
 
 
 	def set_mode(self, mode):
@@ -20,3 +20,5 @@ class VSynth(Stack):
 	def render(self):
 		self.call('update')
 		self.call('draw')
+
+		

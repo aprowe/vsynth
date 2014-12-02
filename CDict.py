@@ -39,6 +39,7 @@ class CDict(dict):
 		if callable(value):
 			return value
 
+
 		return lambda: value
 
 
