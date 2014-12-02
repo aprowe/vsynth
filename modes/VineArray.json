@@ -1,9 +1,0 @@
-[
-	{
-	"source": ["signal", {
-		"amplitude": 10.0
-	}],
-	"operator": ["equals"],
-		"target": "spawn"
-	}
-]

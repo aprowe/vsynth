@@ -25,6 +25,7 @@ class CDict(dict):
 	def reduceItem(self, value, target):
 		if type(value) is list: 
 			fn = value[0]
+
 			attr = lambda: getattr(target, value[0])
 
 			if callable(attr()):

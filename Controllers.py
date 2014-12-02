@@ -1,6 +1,6 @@
-from Latchable import *
+from Stack import *
 from ddf.minim import Minim
-
+from themidibus import MidiBus
 
 class CameraController(Positional):
 
@@ -16,6 +16,8 @@ class CameraController(Positional):
 		scale(s.scale)
 		rotate (s.rotate)
 		translate (-s.x, -s.y)
+
+
 
 class AudioController(Latchable):
 	
@@ -36,6 +38,28 @@ class AudioController(Latchable):
 		sum/= s.mic.bufferSize()
 		return sqrt(sum);
 
-
 	def mix(s):
 		return s.sig
+
+class MidiController(Latchable):
+	def __init__(s):
+		  s.bus = MidiBus(s, 1, 1)
+		  s.bus.list()
+		  s.controls = {}
+		  super(MidiController, s).__init__()
+
+
+	def control_change(s, num, val):
+		s.controls[num] = val
+
+	def get_value(s, num):
+		if num in s.controls:
+			return s.controls[num]
+
+		return 0
+
+
+
+
+
+

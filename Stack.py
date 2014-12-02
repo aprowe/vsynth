@@ -1,6 +1,6 @@
 from CDict import *
 import json
-
+import os
 
 def callable(arg):
 	return hasattr(arg, '__call__')
@@ -11,15 +11,33 @@ def numeric(arg):
 def string(arg):
 	return type(arg) is type('str')
 
+
+class Stack(dict):
+
+	def __init__(s):
+		super(Stack, s).__init__()
+		s.order = list()
+
+	def add(s, label, runnable):
+		s[label] = runnable
+		s.order.append(label)
+
+	def call(s, fn, *args):
+		[getattr(s[item], fn)(*args) for item in s.order]
+
+
 class Latchable(object):
 
-	def __init__(self):
+	ROOT_DIR = "modes/"
+	Stack = None
+
+	def __init__(self, mode='default'):
+		self.self = self
 		self.seed1 = random(-1000, 1000)
 		self.seed2 = random(-1000, 1000)
-		self.current_mode_name = 'default'
-		self.modes = {'default': []}
-		self.attach_latches()
-
+		self.current_mode_name = mode
+		self.modes = {mode: []}
+		self.load_all_modes()
 
 	def draw(self):
 		pass
@@ -28,56 +46,77 @@ class Latchable(object):
 		[fn() for fn in self.current_mode()]
 
 	##################################
-	#	Mode Methods
+	#	Mode Methods                 #
 	##################################
-	def setMode(self, name):
-		self.current_mode_name = name
+	def set_mode(self, name):
+		if name in self.modes:
+			self.current_mode_name = name
 
 	def current_mode(self):
 		return self.modes[self.current_mode_name]
 
-	def load_mode(self, filename):
+	def load_json(self, path):
 		try:
-			json_data=open('modes/'+filename + '.json')
+			json_data=open(Latchable.ROOT_DIR + path + '.json')
 		except:
 			return {}
 
 		data = json.load(json_data)
 		json_data.close()
-		print(data)
 		return data
+
+	def load_mode_file(self, mode):
+		data = self.load_json(mode)
+		class_name = self.__class__.__name__
+
+		if class_name not in data:
+			return
+
+		args = data[class_name]
+		self.attach_latches(args, mode)
+
+	def load_all_modes(self):
+		files = (os.path.splitext(file)[0]
+				for file in os.listdir(Latchable.ROOT_DIR) 
+				if file.endswith('.json'))
+
+		for file in files:
+			self.load_mode_file(file)
+
 
 	##################################
 	#	'Stack' Methods
 	##################################
-	def attach_latches(self):
-		latches = self.getLatches()
+	def attach_latches(self, latches, mode='default'):
+		if mode not in self.modes:
+			self.modes[mode] = []
+
 		if type(latches) is list:
-			[self.latch(l) for l in latches]
+			[self.latch(l, mode) for l in latches]
 		elif type(latches) is dict:
 			for mode, value in latches.items():
 				self.modes[mode] = []
 				[self.latch(l, mode) for l in value]
 
-	def getLatches(self):
-		return self.load_mode(self.__class__.__name__)
-		# return {}
 
-	def addStack(self, stack):
-		Latchable.Stack = stack
-
-	def latch(self, args, mode='default'):
-		target = args['target']
-		args['target'] = [target]
-		args = Latchable.formatLatch(args)
+	def latch(self, dic, mode='default'):
+		args = Latchable.formatLatch(dic)
+		target = args['operator'][1]['target'][0]
 
 		operator = args.reduce(self)['operator']
-		update = lambda: setattr(self, target, operator())
+
+		attr = getattr(self, target)
+		update = lambda: setattr(self, target, operator())			
 
 		self.modes[mode].append(update)
 
 	@staticmethod
 	def formatLatch(dic):
+		if 'target' not in dic:
+			dic['target'] = 'self'
+
+		dic['target'] = [ dic['target'] ]
+
 		if 'source' not in dic:
 			dic['source'] = dic['target']
 
@@ -121,16 +160,23 @@ class Latchable(object):
 	##################################
 	#	Behaviors
 	##################################
-	def tanh(self, target, source, min=0, max=1, dmin=0, dmax=1, sharpness=1.0):
-		amp = (max-min)/2.0
-		off = (max+min)/2.0
-		damp = (dmax-dmin)/2.0
-		doff = (dmax+dmin)/2.0
+	def tanh(self, target, source, range_max=1.0, range_min=0.0, domain_max=1.0, domain_min=0.0, sharpness=4.0):
+		amp = (range_max-range_min)/2.0
+		off = (range_max+range_min)/2.0
+		damp = (domain_max-domain_min)/2.0
+		doff = (domain_max+domain_min)/2.0
 		x = sharpness/damp*(source-doff)
 		y = x/sqrt(1+x**2) 
 
 		return amp * y + off
 
+	def arctan(self, x1, y1, x2, y2):
+		tan = -atan2(y2-y1, x2-x1)
+		
+		if tan < -PI+0.1:
+			tan = tan * -1
+
+		return tan
 
 
 	##################################
@@ -142,7 +188,7 @@ class Latchable(object):
 	def envelope(self, attack, decay, sustain, release):
 		pass
 
-	def stack(self, key, attr):
+	def stack(self, key, attr="self"):
 		return getattr(Latchable.Stack[key], attr);
 
 	def noise (self, amplitude=1, speed=100.0, seed1=None, seed2=None):
@@ -164,5 +210,34 @@ class Latchable(object):
 	def signal(self, amplitude = 1.0):
 		return Latchable.Stack['audio'].mix() * amplitude
 
+	def midi(self, num, amplitude = 1.0):
+		return Latchable.Stack['midi'].get_value(num) * amplitude
+
+	def atan(s, p1, p2):
+			
+		tan = -atan2(p1.y-p2.y, p1.x-p2.x)
+
+		if tan < -PI+0.1: 
+			tan = tan * -1
+
+		return tan
+
+class Positional(Latchable):
+
+	def __init__(s, x=0, y=0):
+		s.x = x
+		s.y = y
+		super(Positional, s).__init__()
+
+	def follow(s, target, source, speed = 0.2):
+		x = s.approach(target.x, source.x, speed)
+		y = s.approach(target.y, source.y, speed)
+		target.x = x
+		target.y = y
+		return target
+
+
+	def point(s, x, y):
+		return Positional(x, y)
 
 
