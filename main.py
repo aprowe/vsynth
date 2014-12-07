@@ -85,7 +85,7 @@ class Line(Positional):
 			rotateY(p2[0])
 			if i == 10:
 				i = 0
-				cylinder(250 + s.noise(seed1=j)*100, abs(s.noise(seed1=j)*250) + 25 , p2[2]*10, 10, s.texture)
+				cylinder(250 + s.noise(seed1=j)*100, abs(s.noise(seed1=j)*250) + 250 , p2[2]*10, 30, s.texture)
 			# line(0,0,0,0,0,p2[2])
 			# line(5,0,0,5,0,p2[2])
 			# line(0,5,0,0,5,p2[2])
