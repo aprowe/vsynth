@@ -32,6 +32,7 @@ class Latchable(object):
 	Stack = None
 
 	def __init__(self, mode='default'):
+		self.init()
 		self.self = self
 		self.seed1 = random(-1000, 1000)
 		self.seed2 = random(-1000, 1000)
@@ -39,11 +40,19 @@ class Latchable(object):
 		self.modes = {mode: []}
 		self.load_all_modes()
 
+	def init(self):
+		pass
+
 	def draw(self):
 		pass
 
-	def update(self):
+	def render(self):
+		self.update()
 		[fn() for fn in self.current_mode()]
+		self.draw()
+
+	def update(self):
+		pass
 
 	##################################
 	#	Mode Methods                 #
@@ -62,6 +71,7 @@ class Latchable(object):
 			return {}
 
 		data = json.load(json_data)
+		print("loaded",path)
 		json_data.close()
 		return data
 
@@ -237,7 +247,10 @@ class Positional(Latchable):
 		target.y = y
 		return target
 
-	def wander(s, target, source, amplitude=1, speed=1):
+	def wander(s, target=None, source=None, amplitude=10, speed=1):
+		if target is None:
+			target = s
+
 		x = s.noise(amplitude, speed, 1)
 		y = s.noise(amplitude, speed, 2)
 		target.x += x
@@ -250,5 +263,24 @@ class Positional(Latchable):
 
 	def distance(s, point):
 		return sqrt((point.y - s.y)**2+(point.x - s.x)**2)
+
+	def bound(s, target=None, source=None, margin=100):
+		if target is None:
+			target = s
+
+		if target.x < source.x - width/2 - margin:
+			target.x = source.x + width/2 + margin 
+
+		elif target.x > source.x + width/2 + margin:
+			target.x = source.x - width/2 - margin 
+
+		if target.y < source.y - height/2 - margin:
+			target.y = source.y + height/2 + margin 
+
+		elif target.y > source.y + height/2 + margin:
+			target.y = source.y - height/2 - margin
+
+		return target
+
 
 
