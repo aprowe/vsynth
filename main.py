@@ -19,7 +19,7 @@ def draw():
 
 class Line(Positional):
 
-	MAX_LENGTH = 100
+	MAX_LENGTH = 600
 
 	def init(s):
 		s.x = s.y = s.z = 0
@@ -45,12 +45,19 @@ class Line(Positional):
 	def get_point(s, i):
 		i = i - (s.length - Line.MAX_LENGTH)
 
+
 		if i < 0:
 			i = 0
 
-		if i >= len(s.points):
-			i = len(s.points)-1
-		return s.points[int(i)]
+		if i >= len(s.points)-1:
+			i = len(s.points)-2
+
+		I = int(i)
+		R = i-I
+
+		inter = interpolate(s.points[I], s.points[I+1], R)
+		return inter
+		# return s.points[I]
 
 	def get_angle(s, i):
 		i = i - (s.length - Line.MAX_LENGTH)
@@ -58,9 +65,16 @@ class Line(Positional):
 		if i < 0:
 			i = 0
 
-		if i >= len(s.angles):
-			i = len(s.angles)-1
-		return s.angles[int(i)]
+		if i >= len(s.angles)-1:
+			i = len(s.angles)-2
+
+		I = int(i)
+		R = i-I
+
+		inter = interpolate(s.angles[I], s.angles[I+1], R)
+		return inter
+		# return s.angles[I]
+
 
 	def mid_point(s):
 		return len(s.points)/2.0
@@ -70,7 +84,7 @@ class Line(Positional):
 			s.extend()
 
 
-	def extend(s, i=None, speed=1/60.0, amplitude=0.3):
+	def extend(s, i=None, speed=1/60.0, amplitude=0.2):
 		dx, dy, dz = toCart(*s.polar())
 
 		s.x += dx
@@ -124,9 +138,10 @@ class Cam(Latchable):
 
 	def init(s):
 		s.line = vs['line']
-		s.lookahead = 20
+		s.lookahead = 1
 		s.index = -10
 		s.pos = (0,0,0)
+		s.speed = 0
 
 	def draw(s):
 		cam = s.pos + s.target + (0, 1, 0)
@@ -137,8 +152,15 @@ class Cam(Latchable):
 		# popMatrix()
 		camera(*cam)
 
+		color = (255,255,255)
+		if vs['audio'].on_beat:
+			color = [noise(frameCount)*255 for i in range(3)]
+		pointLight(*(color+s.line.get_point(s.index+50)))
+
 	def update(s):
-		s.index += random(2.0)
+		s.speed = s.approach(s.speed, s.signal()*40, 0.1)
+		s.index += s.speed
+		s.speed += 0.1
 		s.line.index = s.index
 		s.pos = s.line.get_point(s.index)
 		s.target = s.line.get_point(s.index + s.lookahead)
@@ -151,6 +173,7 @@ class Tunnel(Latchable):
 		s.min = 0
 		s.max = 100
 		s.texture = loadImage('texture.jpg')
+		s.off = 0
 
 	def interval(s):
 		floor = lambda i,j: i - i % j
@@ -159,7 +182,12 @@ class Tunnel(Latchable):
 	def draw(s):
 		fill(0,255,255)
 		noStroke()
+		s.off += 0.1
+		if s.off >= s.block_size:
+			s.off = 0
+
 		for i in s.interval():
+			i += s.off
 			p1 = s.line.get_point(i)
 			a1 = s.line.get_angle(i)
 			p2 = s.line.get_point(i + s.block_size)
@@ -168,7 +196,9 @@ class Tunnel(Latchable):
 
 			pushMatrix()
 			translate(*s.line.get_point(i))
-			rotateY(a1[1])
-			rotateZ(a1[0])
-			cylinder(250, 50, a1[2], 6, s.texture)
+			rotateZ(a1[1])
+			rotateY(a1[0])
+			n = [noise(i*0.01, j)*255 for j in range(3)]
+			tint(*n)
+			cylinder(300, 150 + 150*noise(i/100.0), a1[2]*s.block_size*3, 15, s.texture)
 			popMatrix()

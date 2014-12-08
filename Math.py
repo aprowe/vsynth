@@ -7,5 +7,7 @@ def toCart(theta, phi, rho):
 
 	return (x,y,z)
 
-def interpolate(p1, p2):
-	return ((p1[0]+p2[0])/2,(p1[1]+p2[1])/2,(p1[2]+p2[2])/2)
+def interpolate(p1, p2, frac):
+	i = lambda y,x,f: y+(x-y)*f
+
+	return  tuple((i(p1[j], p2[j], frac) for j in range(len(p1))))
