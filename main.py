@@ -84,7 +84,7 @@ class Line(Positional):
 			s.extend()
 
 
-	def extend(s, i=None, speed=1/60.0, amplitude=0.2):
+	def extend(s, i=None, speed=1/60.0, amplitude=0.02):
 		dx, dy, dz = toCart(*s.polar())
 
 		s.x += dx
@@ -103,36 +103,11 @@ class Line(Positional):
 		if i is None:
 			i = s.length
 
-		s.phi 	+= (noise(i*speed, 0)-0.5) * amplitude
+		s.phi 	+= (noise(i*speed, 0)-0.5) * amplitude*5
 		s.theta += (noise(i*speed, 100)-0.5) * amplitude
 
-		s.theta = s.approach(s.theta, 0)
-		s.phi = s.approach(s.phi, 0)
-
-
-	# def draw(s):
-	# 	fill(255)
-	# 	stroke(255)
-	# 	i = 0
-	# 	j =0
-	# 	for p1, p2 in zip(s.points, s.angles):
-	# 		tint(s.noise(seed1=100.0, seed2=j)*100+155, s.noise(seed1=0.0,seed2=j)*100+155, s.noise(seed1=200,seed2=j)*100+255)
-	# 		i += 1
-	# 		j += 0.1
-	# 		pushMatrix()
-	# 		# line(*(p1 + p2))
-	# 		translate(*p1)
-	# 		rotateZ(p2[1])
-	# 		rotateY(p2[0])
-	# 		if i == 10:
-	# 			i = 0
-	# 			cylinder(250 + s.noise(seed1=j)*100, abs(s.noise(seed1=j)*250) + 250 , p2[2]*10, 30, s.texture)
-	# 		# line(0,0,0,0,0,p2[2])
-	# 		# line(5,0,0,5,0,p2[2])
-	# 		# line(0,5,0,0,5,p2[2])
-	# 		# line(-5,0,0,-5,0,p2[2])
-	# 		# line(0,-5,0,0,-5,p2[2])
-	# 		popMatrix()
+		s.theta = s.approach(s.theta, i/100.0)
+		# s.phi = s.approach(s.phi, s.lfo(amplitude=2*PI, period=0.1)
 
 class Cam(Latchable):
 
@@ -145,17 +120,9 @@ class Cam(Latchable):
 
 	def draw(s):
 		cam = s.pos + s.target + (0, 1, 0)
-		# pushMatrix()
-		# translate(*s.pos)
-		# fill(0,0,255)
-		# sphere(5)
-		# popMatrix()
 		camera(*cam)
 
-		color = (255,255,255)
-		if vs['audio'].on_beat:
-			color = [noise(frameCount)*255 for i in range(3)]
-		pointLight(*(color+s.line.get_point(s.index+50)))
+		pointLight(255,255,255,*s.line.get_point(s.index+50))
 
 	def update(s):
 		s.speed = s.approach(s.speed, s.signal()*40, 0.1)
@@ -186,19 +153,24 @@ class Tunnel(Latchable):
 		if s.off >= s.block_size:
 			s.off = 0
 
+		width = 150
+
 		for i in s.interval():
 			i += s.off
 			p1 = s.line.get_point(i)
 			a1 = s.line.get_angle(i)
 			p2 = s.line.get_point(i + s.block_size)
 			a2 = s.line.get_angle(i + s.block_size)
+			width *= 0.99
 
+			if width < 50:
+				width =50
 
 			pushMatrix()
 			translate(*s.line.get_point(i))
 			rotateZ(a1[1])
 			rotateY(a1[0])
 			n = [noise(i*0.01, j)*255 for j in range(3)]
-			tint(*n)
-			cylinder(300, 150 + 150*noise(i/100.0), a1[2]*s.block_size*3, 15, s.texture)
+			tint(n[0],n[1], n[2], 150)
+			cylinder(300+s.lfo(amplitude=100.0,period=3.0), width + 50*noise(i/100.0)+s.lfo(amplitude=50.0,period=3.0), a1[2]*s.block_size*3, 30, s.texture)
 			popMatrix()

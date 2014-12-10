@@ -1,6 +1,7 @@
 from Stack import *
 from ddf.minim import Minim
 from themidibus import MidiBus
+from ddf.minim.analysis import BeatDetect
 
 class CameraController(Positional):
 
@@ -42,10 +43,14 @@ class AudioController(Latchable):
 		s.minim = Minim(this)
 		s.mic = s.minim.getLineIn(1)
 		s.sig = 0
+		s.beat = BeatDetect()
+		s.on_beat = False
 		super(AudioController, s).__init__()
 
 	def update(s):
 		s.sig = s.average()
+		s.beat.detect(s.mic.mix)
+		s.on_beat = s.beat.isOnset()
 		super(AudioController, s).update()
 	
 	def average(s):
