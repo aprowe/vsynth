@@ -16,26 +16,6 @@ class CameraController(Positional):
 		rotate (s.rotate)
 		translate (-s.x, -s.y)
 
-		# for i in range(-3,3):
-		# 	for j in range(-3,3):
-		# 		for k in range(-3,3):
-		# 			pushMatrix()
-		# 			translate(i*250, j*250, k*250)
-		# 			noStroke()
-		# 			fill(0,0,255)
-		# 			sphere(5)
-		# 			popMatrix()
-				
-
-
-	def update(s):
-		return 
-		s.n += s.signal()*20
-		if s.n > 400:
-			s.n = 0
-		s.x,s.y,s.z = s.pos
-		s.target = Latchable.Stack['line'].points[int(s.n+10)]
-		s.pos = Latchable.Stack['line'].points[int(s.n)]
 
 class AudioController(Latchable):
 	
