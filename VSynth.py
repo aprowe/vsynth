@@ -1,8 +1,10 @@
 from Stack import *
 from Controllers import *
-
+import random as rand
 
 class VSynth(Stack):
+
+	modes = ['straight','slow','default']
 
 	def __init__(self):
 		Latchable.Stack = self
@@ -23,18 +25,13 @@ class VSynth(Stack):
 		# self.call('update')
 		# self.call('draw')
 
-	def mode_walk(self):
-		if frameCount < 180:
-			return
+	def mode_walk(s, period=5.0):
+		# if frameCount > 0:
+			# return
 
-		if random(1) < 0.001:
-			self.set_mode('slow')
-		if random(1) < 0.002:
-			self.set_mode('intro')
 
-		if random(1) < 0.001:
-			self.set_mode('straight')
+		if random(1) < 1.0/(50.0*period):
+			mode = rand.choice(VSynth.modes)
+			s.set_mode(mode)
 
-		if random(1) < 0.001:
-			self.set_mode('default')
 			

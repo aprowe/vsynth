@@ -12,11 +12,23 @@ def interpolate(p1, p2, frac):
 
 	return  tuple((i(p1[j], p2[j], frac) for j in range(len(p1))))
 
-def normalize(theta, bound):
-	while theta > bound:
+def wrap(theta, bound=TWO_PI):
+	while theta >= bound:
 		theta -= bound
 
-	while theta < -bound:
+	while theta < 0:
 		theta += bound
 
 	return theta
+
+def bound (x, upper, lower=None):
+	if lower is None:
+		lower = -upper
+
+	if x > upper:
+		x = upper
+
+	if x < -upper:
+		x = -upper
+
+	return x

@@ -28,3 +28,17 @@ def cylinder(w, w2=None, h=1, sides=6, pimage=None):
 		vertex (x2[i], z2[i], h+1, i / float(sides) * 1.0, 1)
 
 	endShape()
+
+def tetrahedron(edgeLength=100, pimage=None):
+	beginShape(TRIANGLE_STRIP);
+	if pimage:
+		texture(pimage)
+	vertex(edgeLength, edgeLength, edgeLength  , 1.0, 1.0);
+	vertex(-edgeLength, -edgeLength, edgeLength, 0, 1.0);
+	vertex(-edgeLength, edgeLength, -edgeLength, 0.25, 0.0);
+	vertex(edgeLength, -edgeLength, -edgeLength, 0.75, 0.0);
+	vertex(edgeLength, edgeLength, edgeLength  , 1.0, 1.0);
+	vertex(-edgeLength, -edgeLength, edgeLength, 0, 1.0);
+	endShape(CLOSE);
+
+
