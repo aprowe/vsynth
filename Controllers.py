@@ -44,6 +44,8 @@ class AudioController(Latchable):
 		s.mic = s.minim.getLineIn(1)
 		s.sig = 0
 		s.beat = BeatDetect()
+		s.beat.setSensitivity(300)
+		s.beat.detectMode(BeatDetect.FREQ_ENERGY)
 		s.on_beat = False
 		super(AudioController, s).__init__()
 

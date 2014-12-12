@@ -48,6 +48,9 @@ class Latchable(object):
 
 	def render(self):
 		self.update()
+		if hasattr(self, 'update_'+self.current_mode_name):
+			getattr(self, 'update_'+self.current_mode_name)()
+
 		[fn() for fn in self.current_mode()]
 		self.draw()
 
@@ -58,8 +61,9 @@ class Latchable(object):
 	#	Mode Methods                 #
 	##################################
 	def set_mode(self, name):
-		if name in self.modes:
-			self.current_mode_name = name
+		self.current_mode_name = name
+		if name not in self.modes:
+			self.modes[name] = []
 
 	def current_mode(self):
 		return self.modes[self.current_mode_name]

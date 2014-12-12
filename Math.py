@@ -11,3 +11,12 @@ def interpolate(p1, p2, frac):
 	i = lambda y,x,f: y+(x-y)*f
 
 	return  tuple((i(p1[j], p2[j], frac) for j in range(len(p1))))
+
+def normalize(theta, bound):
+	while theta > bound:
+		theta -= bound
+
+	while theta < -bound:
+		theta += bound
+
+	return theta
