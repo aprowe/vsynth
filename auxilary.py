@@ -1,6 +1,8 @@
 
 
-## Math Function
+#########################
+# Math Functions
+#########################
 def toCart(theta, phi, rho):
 	x = cos(phi) * sin(theta) * rho
 	y = sin(phi) * sin(theta) * rho
@@ -34,6 +36,10 @@ def bound (x, upper, lower=None):
 
 	return x
 
+
+#############################
+# Shapes					#
+#############################
 def cylinder(w, w2=None, h=1, sides=6, pimage=None):
 	sides += 1
 	w2 = w if w2 is None else w2
@@ -78,3 +84,26 @@ def tetrahedron(edgeLength=100, pimage=None):
 	endShape(CLOSE);
 
 
+##########################
+# Color Stuff
+##########################
+
+def randomColor(max=255):
+	return tuple((random(max) for i in range (3)))
+
+
+##########################
+#	Data stuff
+##########################
+import json
+
+def load_json(path):
+	try:
+		json_data=open(path + '.json')
+	except:
+		return {}
+
+	data = json.load(json_data)
+	print("loaded",path)
+	json_data.close()
+	return data

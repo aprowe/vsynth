@@ -1,7 +1,8 @@
 from Stack import *
 from ddf.minim import Minim
-from themidibus import MidiBus
+from themidibus import MidiBus, SimpleMidiListener
 from ddf.minim.analysis import BeatDetect
+from auxilary import *
 
 class CameraController(Positional):
 
@@ -45,22 +46,38 @@ class AudioController(Latchable):
 	def mix(s):
 		return s.sig
 
-class MidiController(Latchable):
-	def __init__(s):
-		  s.bus = MidiBus(s, 1, 1)
-		  s.bus.list()
-		  s.controls = {}
-		  super(MidiController, s).__init__()
+class MidiController(Latchable, SimpleMidiListener):
+
+	def init(s):
+		s.bus = MidiBus(s, 1, 2)
+		s.bus.list()
+		midi_map = load_json('data/midi_map')
+
+		s.mapping = midi_map['nanoKontrol']
+		s.values = midi_map['default']
+		for key in s.values:
+			s.values[key] = float(s.values[key])
+
+		print(s.mapping)
+		print(s.values)
 
 
-	def control_change(s, num, val):
-		s.controls[num] = val
+	def controllerChange(s, channel, number, value):
+		key = s.mapping[str(number)]
+		s.values[key] = value/127.0
+		print(value)
 
-	def get_value(s, num):
-		if num in s.controls:
-			return s.controls[num]
+
+	def get(s, key):
+		if "macro_"+str(key) in s.values:
+			return s.values["macro_"+str(key)]
+
+		if key in s.values:
+			return s.values[key]
 
 		return 0
+
+
 
 
 
