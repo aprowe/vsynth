@@ -1,12 +1,11 @@
 from VSynth import *
-from auxiliary import *
+from auxilary import *
 
 vs = VSynth()
-Latchable.Stack = vs
 
 def setup():
-	size(1440,900, P3D)
-	textureMode(NORMAL);
+	size(1440,900)
+	textureMode(NORMAL)
 
 def draw():
 	background(0)

@@ -7,12 +7,12 @@ class VSynth(Stack):
 	modes = ['straight','slow','default']
 
 	def __init__(self):
-		Latchable.Stack = self
 		super(VSynth, self).__init__()
+		Latchable.Stack = self
 		self.current_mode = 'default'
-		self.add('camera', CameraController())
-		self.add('audio', AudioController())
-		self.add('midi', MidiController())
+		self.append(CameraController(), 'camera')
+		self.append(AudioController(), 'audio')
+		self.append(MidiController(), 'midi')
 
 
 	def set_mode(self, mode):

@@ -3,18 +3,34 @@ import json
 import os
 
 
-class Stack(dict):
+class Stack(object):
+
+	@staticmethod
+	def subcall(instance, fn, *args):
+		if hasattr(instance, 'call'):
+			instance.call(fn, *args)
+
+		if hasattr(instance, fn):
+			getattr(instance, fn)(*args)
+
 
 	def __init__(s):
-		super(Stack, s).__init__()
+		s.dict = dict()	
 		s.order = list()
 
-	def add(s, label, runnable):
-		s[label] = runnable
+	def append(s, latchable, label=None):
+		latchable.__stack__ = s
+
+		if label is None:
+			label = "latch_"+str(len(s.order))
+
+		s.dict[label] = latchable
 		s.order.append(label)
 
+
 	def call(s, fn, *args):
-		[getattr(s[item], fn)(*args) for item in s.order]
+		[Stack.subcall(s.dict[item],fn,*args) for item in s.order]
+
 
 
 class Latchable(object):
@@ -283,4 +299,8 @@ class Positional(Latchable):
 		return target
 
 
+class Substack(Stack, Latchable):
 
+	def __init__(s):
+		Stack.__init__(s)
+		Latchable.__init__(s)
