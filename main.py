@@ -1,6 +1,5 @@
 from VSynth import *
-from Math import *
-from shapes import *
+from auxiliary import *
 
 vs = VSynth()
 Latchable.Stack = vs

@@ -2,15 +2,6 @@ from CDict import *
 import json
 import os
 
-def callable(arg):
-	return hasattr(arg, '__call__')
-
-def numeric(arg):
-	return type(arg) in [type(1),type(1.0)]
-
-def string(arg):
-	return type(arg) is type('str')
-
 
 class Stack(dict):
 
