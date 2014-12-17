@@ -82,7 +82,6 @@ class Latchable(object):
 			return {}
 
 		data = json.load(json_data)
-		print("loaded",path)
 		json_data.close()
 		return data
 
