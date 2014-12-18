@@ -41,3 +41,13 @@ def draw():
 
 
 
+# class WrapTheta(Behavior):
+
+# 	def update(s, theta):
+# 		if theta > TWO_PI:
+# 			theta = 0
+
+# 		if theta < 0:
+# 			theta = TWO_PI
+
+# 		return theta
