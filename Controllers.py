@@ -1,8 +1,11 @@
-from Stack import *
+
 from ddf.minim import Minim
 from themidibus import MidiBus, SimpleMidiListener
 from ddf.minim.analysis import BeatDetect
+
 from auxilary import *
+from Latchable import *
+from Positional import *
 
 class CameraController(Positional):
 

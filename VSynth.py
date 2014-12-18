@@ -1,5 +1,9 @@
 from Stack import *
+from Latchable import *
+from Mode import *
 from Controllers import *
+from Behavior import *
+
 import random as rand
 
 class VSynth(Stack):
@@ -19,6 +23,7 @@ class VSynth(Stack):
 		if type(mode) is str:
 			mode = Mode(mode)
 
+		print(mode)
 		[mode.attach_latch(latch) for latch in self.dict.values()]
 		self.modes.append(mode)
 

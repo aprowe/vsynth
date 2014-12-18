@@ -1,4 +1,4 @@
-import Latchable
+from Latchable import *
 
 class Positional(Latchable):
 

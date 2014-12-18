@@ -9,13 +9,13 @@ class Latchable(object):
 	Stack = None
 
 	def __init__(self, mode='default'):
-		self.init()
+		self.behaviors = {}
 		self.self = self
 		self.seed1 = random(-1000, 1000)
 		self.seed2 = random(-1000, 1000)
 		self.current_mode_name = mode
 		self.modes = {mode: []}
-		self.behaviors = {}
+		self.init()
 		self.load_all_modes()
 
 	def init(self):
@@ -26,8 +26,8 @@ class Latchable(object):
 
 	def render(self):
 		self.update()
-		if hasattr(self, 'update_'+self.current_mode_name):
-			getattr(self, 'update_'+self.current_mode_name)()
+		if hasattr(self,  'update_' + self.current_mode_name):
+			getattr(self, 'update_' + self.current_mode_name)()
 
 		[fn() for fn in self.current_mode()]
 		[fn() for fn in self.behaviors.values()]
@@ -80,13 +80,18 @@ class Latchable(object):
 	##################################
 	#	'Behavior' Methods
 	##################################
-	def attach_behavior(self, behavior, parameter, label=None):
+	def attach_behavior(self, behavior, parameters, label=None):
 		if not label:
-			label = count(self.behaviors)
+			label = len(self.behaviors)
 
-		self.behavior[name] = behavior.update_latch(self, parameter)
+		if not hasattr(parameters, '__init__'):
+			parameters = [parameters]
 
-	def remove_behavior(self, label):
+		fn = behavior.update_latch(self, parameters)
+		self.behaviors[label] = fn
+
+
+	def remove_behavior(self, label, mode=None):
 		if label in self.behaviors:
 			del self.behaviors[label]
 
