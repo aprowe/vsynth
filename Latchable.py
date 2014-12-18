@@ -2,29 +2,39 @@ from CDict import *
 import json
 import os
 
+from Behavior import *
+from auxilary import load_json, ucfirst
 
 class Latchable(object):
 
 	ROOT_DIR = "modes/"
-	Stack = None
 
 	def __init__(self, mode='default'):
 		self.behaviors = {}
+		
+		self.modes = {}
+		self.current_mode_name = mode
+
 		self.self = self
+		
 		self.seed1 = random(-1000, 1000)
 		self.seed2 = random(-1000, 1000)
-		self.current_mode_name = mode
-		self.modes = {mode: []}
+		
 		self.init()
+		
 		self.load_all_modes()
+
 
 	def init(self):
 		pass
 
 	def draw(self):
+		"""Called last, used for drawing"""
 		pass
 
 	def render(self):
+		"""Update the Latch and all of its functions"""
+
 		self.update()
 		if hasattr(self,  'update_' + self.current_mode_name):
 			getattr(self, 'update_' + self.current_mode_name)()
@@ -40,25 +50,35 @@ class Latchable(object):
 	#	Mode Methods                 #
 	##################################
 	def set_mode(self, name):
+		"""Set the mode to a mode stored in its mode dictionary"""
 		self.current_mode_name = name
 		if name not in self.modes:
 			self.modes[name] = []
 
 	def current_mode(self):
-		return self.modes[self.current_mode_name]
+		"""Returns the current set of functions being updated"""
+		if self.current_mode_name in self.modes:
+			return self.modes[self.current_mode_name]
 
-	def load_json(self, path):
-		try:
-			json_data=open(Latchable.ROOT_DIR + path + '.json')
-		except:
-			return {}
+		return []
 
-		data = json.load(json_data)
-		json_data.close()
-		return data
+	def append_mode(self, mode):
+		mode.attach_latch(self)
+
+
+	# def load_json(self, path):
+	# 	try:
+	# 		json_data=open(Latchable.ROOT_DIR + path + '.json')
+	# 	except:
+	# 		return {}
+
+	# 	data = json.load(json_data)
+	# 	json_data.close()
+	# 	return data
 
 	def load_mode_file(self, mode):
-		data = self.load_json(mode)
+		"""Loads a mode from a json file into its mode dictionary"""
+		data = load_json(Latchable.ROOT_DIR + mode)
 		class_name = self.__class__.__name__
 
 		if class_name not in data:
@@ -66,7 +86,7 @@ class Latchable(object):
 
 		args = data[class_name]
 		self.attach_latches(args, mode)
-		print "Loaded "+mode 
+		print "Loaded " + mode 
 
 	def load_all_modes(self):
 		files = (os.path.splitext(file)[0]
@@ -81,10 +101,19 @@ class Latchable(object):
 	#	'Behavior' Methods
 	##################################
 	def attach_behavior(self, behavior, parameters, label=None):
+		"""Attaches a behavior to this latch.
+			
+			behavior Behavior instance to used
+			parameters single or array of attribute strings
+			label string key for the dictionary (auto generated if not specified) 
+		""" 
+		if type(behavior) is str:
+			behavior = eval(ucfirst(behavior))()
+
 		if not label:
 			label = len(self.behaviors)
 
-		if not hasattr(parameters, '__init__'):
+		if not hasattr(parameters, '__iter__'):
 			parameters = [parameters]
 
 		fn = behavior.update_latch(self, parameters)
@@ -201,7 +230,7 @@ class Latchable(object):
 		pass
 
 	def stack(self, key, attr="self"):
-		return getattr(Latchable.Stack[key], attr);
+		return getattr(self.__stack__.dict[key], attr)
 
 	def noise (self, amplitude=1, speed=100.0, seed1=None, seed2=None):
 		if seed1 is None:
@@ -220,10 +249,10 @@ class Latchable(object):
 			return 0
 
 	def signal(self, amplitude = 1.0):
-		return Latchable.Stack['audio'].mix() * amplitude
+		return self.__stack__.dict['audio'].mix() * amplitude
 
 	def midi(self, num, amplitude = 1.0):
-		return Latchable.Stack['midi'].get_value(num) * amplitude
+		return self.__stack__.dict['midi'].get_value(num) * amplitude
 
 	def atan(s, p1, p2):
 			

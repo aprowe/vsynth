@@ -107,3 +107,9 @@ def load_json(path):
 	print("loaded",path)
 	json_data.close()
 	return data
+
+def lcfirst(string):
+	return string[:1].lower() + string[1:] if string else ''
+
+def ucfirst(string):
+	return string[:1].upper() + string[1:] if string else ''

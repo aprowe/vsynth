@@ -1,8 +1,6 @@
 class Behavior(object):
 
 	def update_latch(s, instance, parameters):
-		print parameters
-		print parameters
 
 		def _update():
 			attr = [getattr(instance, p) for p in parameters]
@@ -11,10 +9,9 @@ class Behavior(object):
 				attr = [attr]
 			[setattr(instance, p, a) for p, a in zip(parameters, attr)]
 
-		return _update;
+		return _update
 
 	def update(s, *param):
-		print('hi')
 		pass
 
 
@@ -42,10 +39,10 @@ class Wrap(Behavior):
 		s.width = max - min
 
 	def update(s, param):
-		while theta >= s.max:
-			theta -= s.width
+		while param >= s.max:
+			param -= s.width
 
-		while theta < s.min
-			theta += s.witch
+		while param < s.min:
+			param += s.width
 
-		return theta
+		return param

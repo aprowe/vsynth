@@ -1,4 +1,5 @@
 from types import MethodType
+from auxilary import lcfirst
 			
 class Mode(object):
 
@@ -9,18 +10,14 @@ class Mode(object):
 		pass
 
 	@staticmethod
-	def lcfirst(string):
-		return string[:1].lower() + string[1:] if string else ''
-
-	@staticmethod
 	def to_function_str(fn, latch):
-		return fn+'_'+Mode.lcfirst(latch.__class__.__name__)
+		return fn+'_'+lcfirst(latch.__class__.__name__)
 
 	def name(s):
-		return	Mode.lcfirst(s.__class__.__name__)
+		return	lcfirst(s.__class__.__name__)
 
 	def attach_latch(s,latch):
-		update_name = 'update_'+Mode.lcfirst(latch.__class__.__name__)
+		update_name = 'update_'+lcfirst(latch.__class__.__name__)
 
 		if hasattr(s, update_name):
 			mode_function = getattr(s, update_name)

@@ -23,6 +23,9 @@ class Stack(object):
 		s.dict[label] = latchable
 		s.order.append(label)
 
+	def get(s, index):
+		return s.dict[s.order[index]]
+
 
 	def call(s, fn, *args):
 		[Stack.subcall(s.dict[item],fn,*args) for item in s.order]

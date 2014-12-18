@@ -8,7 +8,11 @@ class Positional(Latchable):
 		s.z = z
 		super(Positional, s).__init__()
 
-	def follow(s, target, source, speed = 0.2):
+	def follow(s, target, source=None, speed = 0.2):
+		if source is None:
+			source = target
+			target = s
+
 		x = s.approach(target.x, source.x, speed)
 		y = s.approach(target.y, source.y, speed)
 		z = s.approach(target.z, source.z, speed)
@@ -29,12 +33,15 @@ class Positional(Latchable):
 		target.z += z
 		return target
 
+	def pos(s):
+		return (s.x, s.y, s.z)
+
 
 	def point(s, x, y, z):
 		return Positional(x, y, z)
 
 	def distance(s, point):
-		return sqrt((point.y - s.y)**2+(point.x - s.x)**2)
+		return sqrt((point.y - s.y)**2+(point.x - s.x)**2+(point.z - s.z)**2)
 
 	def bound(s, target=None, source=None, margin=100):
 		if target is None:

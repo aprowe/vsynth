@@ -1,57 +1,96 @@
 from VSynth import *
-from auxilary import *
 
 vs = VSynth()
 
 def setup():
-	size(1440,900)
+	size(1440,900, P3D)
 	textureMode(NORMAL)
 
-	vs.append(Orb())
+	vs.append(VineArray(), 'vines')
+	vs.append_mode(Default())
+	vs.append_mode(Follow())
 
-	vs.append_mode('smooth')
-	vs.append_mode(Crazy())
+	vs.set_mode('follow')
 
-	vs.set_mode('crazy')
 
 def draw():
-	background(0)
+	background(255)
 	vs.render()
 
-class Orb(Positional):
+class Vine(Positional):
 
 	def init(s):
-		s.attach_behavior(Bound(-10,10), 'x')
-		s.attach_behavior(Bound(-10,10), 'y')
+		s.theta = random(0,TWO_PI)
+		s.phi = random(0, PI)
+		s.speed = 5.0
+		s.attach_behavior('wrap', 'theta')
+		s.points = [(0,0,0)]
+
+	def pos(s):
+		return (s.x,s.y,s.z)
+
+	def angle(s):
+		return (s.theta, s.phi, s.speed)
+
+	def update(s):
+		s.points.append((s.x,s.y,s.z))
+		(dx, dy, dz) = toCart(*s.angle())
+		# s.x += s.speed * sin(s.theta)
+		# s.y += s.speed * cos(s.theta)
+		s.x += dx
+		s.y += dy
+		s.z += dz
+
+		if len(s.points) > 500:
+			del s.points[0]
+
 
 	def draw(s):
-		fill(255)
-		ellipse(s.x, s.y, 20, 20)
-
-	def update_default(s):
-		s.x += random(-1,1)
-		s.y += random(-1,1)
-
-	def update_smooth(s):
-		s.x = s.lfo(amplitude=200, period=2)
-		s.y = s.lfo(amplitude=200, period=2)
-
-class Crazy(Mode):
-
-	def update_orb(mode, s):
-		s.x = s.noise(amplitude=200)
-		s.y = s.noise(amplitude=200)
-		mode 
+		stroke(0)
+		weight = 10
+		min_weight = 0.8
+		for p1, p2 in zip(s.points[0:-1], s.points[1:]):
+			weight -= (weight-min_weight)*0.05
+			strokeWeight(weight)
+			line(*(p2+p1))
 
 
+class VineArray(Substack):
 
-# class WrapTheta(Behavior):
+	def init(s):
+		s.append_array(Vine, 10)
+		s.x = 0
+		s.y = 0
+		s.z = 0
 
-# 	def update(s, theta):
-# 		if theta > TWO_PI:
-# 			theta = 0
+	def pos(s):
+		return (s.x,s.y,s.z)
 
-# 		if theta < 0:
-# 			theta = TWO_PI
+	def update(s):
+		s.x = s.get(0).x
+		s.y = s.get(0).y
 
-# 		return theta
+class Default(Mode):
+
+	def update_vine(mode, s):
+		s.theta += s.noise(amplitude = 1.0)
+		s.phi += s.noise(amplitude = 1.0)
+
+	def update_camera3D(mode, s):
+		# s.follow(s.stack('vines'))
+		s.theta += 0.01
+		s.phi += 0.00
+
+		(s.x, s.y, s.z) = toCart(*(s.theta, s.phi, 1000))
+		# s.follow()
+
+class Follow(Default):
+
+	def update_camera3D(mode, s):
+		# s.follow(s.stack('vines'))
+		s.target = s.stack('vines').pos()
+		s.theta += 0.01
+		s.phi += 0.00
+
+		(s.x, s.y, s.z) = toCart(*(s.theta, s.phi, 1000))
+		# s.follow()

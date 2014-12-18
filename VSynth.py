@@ -1,8 +1,11 @@
+from auxilary import *
 from Stack import *
-from Latchable import *
-from Mode import *
-from Controllers import *
 from Behavior import *
+from Mode import *
+from Latchable import *
+from Substack import *
+from Positional import *
+from Controllers import *
 
 import random as rand
 
@@ -10,12 +13,12 @@ class VSynth(Stack):
 
 	def __init__(self):
 		super(VSynth, self).__init__()
-		Latchable.Stack = self
 		
 		self.modes = [Mode('default')]
 		self.current_mode = self.modes[0]
 
 		self.append(CameraController(), 'camera')
+		self.append(Camera3D(), 'camera3d')
 		self.append(AudioController(), 'audio')
 		self.append(MidiController(), 'midi')
 
@@ -23,13 +26,11 @@ class VSynth(Stack):
 		if type(mode) is str:
 			mode = Mode(mode)
 
-		print(mode)
-		[mode.attach_latch(latch) for latch in self.dict.values()]
-		self.modes.append(mode)
+		# [mode.attach_latch(latch) for latch in self.dict.values()]
+		# [latch.append_mode(mode) for latch in self.dict.values()]
+		self.call('append_mode', mode)
 
-	def append(s, latch, label=None):
-		[mode.attach_latch(latch) for mode in s.modes]
-		super(VSynth, s).append(latch, label)
+		self.modes.append(mode)
 
 	def set_mode(self, mode):
 		if type(mode) is str:
@@ -38,6 +39,10 @@ class VSynth(Stack):
 		self.current_mode = mode
 		self.current_mode.init()
 		self.call('set_mode', mode.label)
+
+	def append(s, latch, label=None):
+		[mode.attach_latch(latch) for mode in s.modes]
+		super(VSynth, s).append(latch, label)
 
 	def render(self):
 		self.call('render')

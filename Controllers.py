@@ -20,6 +20,16 @@ class CameraController(Positional):
 		rotate (s.rotate)
 		translate (-s.x, -s.y)
 
+class Camera3D(Positional):
+
+	def init(s):
+		s.target = (0,0,0)
+		s.theta = 0
+		s.phi = 0
+
+	def draw(s):
+		camera(*(s.pos()+s.target+(0,1,0)))
+
 
 class AudioController(Latchable):
 	
