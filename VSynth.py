@@ -17,7 +17,7 @@ class VSynth(Stack):
 		self.modes = [Mode('default')]
 		self.current_mode = self.modes[0]
 
-		self.append(CameraController(), 'camera')
+		# self.append(CameraController(), 'camera')
 		self.append(Camera3D(), 'camera3d')
 		self.append(AudioController(), 'audio')
 		self.append(MidiController(), 'midi')

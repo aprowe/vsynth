@@ -39,5 +39,4 @@ class Threshold(Trigger):
 		s.thresh = thresh
 
 	def behave(s, latch, thresh):
-		print thresh
 		return thresh > s.thresh 

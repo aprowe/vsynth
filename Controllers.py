@@ -26,6 +26,7 @@ class Camera3D(Positional):
 		s.target = (0,0,0)
 		s.theta = 0
 		s.phi = 0
+		s.z = 500
 
 	def draw(s):
 		camera(*(s.pos()+s.target+(0,1,0)))
