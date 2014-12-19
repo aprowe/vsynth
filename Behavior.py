@@ -1,19 +1,19 @@
 class Behavior(object):
 
-	def update_latch(s, instance, parameters):
+	def create_function(s, instance, parameters):
 		print parameters
 		print parameters
 
 		def _update():
 			attr = [getattr(instance, p) for p in parameters]
-			attr = s.update(*attr)
+			attr = s.behave(*attr)
 			if not hasattr(attr, '__iter__'):
 				attr = [attr]
 			[setattr(instance, p, a) for p, a in zip(parameters, attr)]
 
 		return _update;
 
-	def update(s, *param):
+	def behave(s, *param):
 		print('hi')
 		pass
 
@@ -24,7 +24,7 @@ class Bound(Behavior):
 		s.max = max
 		s.min = min
 
-	def update(s, param):
+	def behave(s, param):
 		if param > s.max:
 			return s.max
 
@@ -41,7 +41,7 @@ class Wrap(Behavior):
 		s.min = min
 		s.width = max - min
 
-	def update(s, param):
+	def behave(s, param):
 		while theta >= s.max:
 			theta -= s.width
 

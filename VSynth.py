@@ -36,7 +36,7 @@ class VSynth(Stack):
 			mode = [m for m in self.modes if m.label == mode][0]
 
 		self.current_mode = mode
-		self.current_mode.init()
+		self.current_mode.init(self)
 		self.call('set_mode', mode.label)
 
 	def render(self):

@@ -87,7 +87,7 @@ class Latchable(object):
 		if not hasattr(parameters, '__init__'):
 			parameters = [parameters]
 
-		fn = behavior.update_latch(self, parameters)
+		fn = behavior.create_function(self, parameters)
 		self.behaviors[label] = fn
 
 
@@ -95,6 +95,13 @@ class Latchable(object):
 		if label in self.behaviors:
 			del self.behaviors[label]
 
+	def attach_trigger(self, behavior, function, parameters, label=None):
+		if not hasattr(parameters, '__iter__'):
+			parameters = [parameters]
+
+		function = [function]
+
+		self.attach_behavior(behavior, function+parameters, label)
 
 	##################################
 	#	'Stack' Methods
