@@ -6,7 +6,7 @@ class Mode(object):
 	def __init__(s, label=None):
 		s.label = label if label else s.name()
 
-	def init(s):
+	def init(s, stack):
 		pass
 
 	@staticmethod

@@ -24,6 +24,7 @@ class Vine(Positional):
 		s.phi = random(0, PI)
 		s.speed = 5.0
 		s.attach_behavior('wrap', 'theta')
+		s.attach_behavior('threshold', ('_print','x'))
 		s.points = [(0,0,0)]
 
 	def pos(s):
@@ -53,6 +54,9 @@ class Vine(Positional):
 			weight -= (weight-min_weight)*0.05
 			strokeWeight(weight)
 			line(*(p2+p1))
+
+	def _print(s):
+		print 'ok'
 
 
 class VineArray(Substack):
